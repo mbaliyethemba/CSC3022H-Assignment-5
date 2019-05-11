@@ -48,6 +48,10 @@ namespace SHNMBA004{
 					std::cout<<"Cannot open file"<<std::endl;
 				}
 			}
-			
+		public:
+			//constructor
+			audio(const std::string &filename, int &channel, int &rate) : noOfChannels(channel), sampleRateInHz(rate){
+				loadAudio(filename);
+			}
 	}
 }
