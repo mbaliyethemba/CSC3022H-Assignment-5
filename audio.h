@@ -8,6 +8,8 @@
 #include <sstream>
 #include <cstdint>
 #include <algorithm>
+#include <numeric>
+#include <math.h>
 
 namespace SHNMBA004{
 	//Generic parameters
@@ -29,7 +31,7 @@ namespace SHNMBA004{
 					this->lenOfAudioSeconds = (int)(noOfSamples / ((float) sampleRateInHz));
 					audioData.resize(noOfSamples);
 					
-					for(int i = o; i < noOfSamples; i++){
+					for(int i = 0; i < noOfSamples; i++){
 						char buffer[sizeof(BitType)];
 						BitType sample;
 						input.read((char *) buffer, sizeof(BitType)); //reads in the sample
@@ -63,7 +65,7 @@ namespace SHNMBA004{
 				noOfSamples = 0;
 				lenOfAudioSeconds = 0;
 				audioData.clear();
-				std::vector<BitType>().swap(audioData)
+				std::vector<BitType>().swap(audioData);
 			}
 			
 			//constructor
@@ -116,7 +118,7 @@ namespace SHNMBA004{
 		};
 		
 		int getNoOfSamples(){
-			return noOfSamples
+			return noOfSamples;
 		};
 		
 		int getLenInSec(){
@@ -169,12 +171,12 @@ namespace SHNMBA004{
 		//adds the sound amplitudes
 		audio operator + (const audio & rhs){
 			audio con(*this);
-			for(int i = 0; i < audioData,size(); ++i){
+			for(int i = 0; i < audioData.size(); ++i){
 				BitType sumOfSound = audioData[i] + rhs.audioData[i];
 				if (sumOfSound > std::numeric_limits<BitType>::max()){
 					sumOfSound = std::numeric_limits<BitType>::max();//clamp if too large
 				}
-				con.audioData[i] = sumofSound;
+				con.audioData[i] = sumOfSound;
 			}
 			return con;
 		}
@@ -184,7 +186,7 @@ namespace SHNMBA004{
 			int noOfSamplesWithCuts = noOfSamples - (rangeCut.second - rangeCut.first) - 1;
 			int cutLength = (int) (noOfSamplesWithCuts / ((float) sampleRateInHz));
 			std::vector<BitType> cutAudioData;
-			for(int i = 0; i < audioData.size(), ++i){
+			for(int i = 0; i < audioData.size(); ++i){
 				if(i < rangeCut.first || i < rangeCut.second){
 					cutAudioData.push_back(audioData[i]);
 				}
@@ -249,8 +251,8 @@ namespace SHNMBA004{
 						return outAmp;
 					}
 		};
-	}
-};
+	};
+
 
 	template <typename BitType>
 	class audio<std::pair<BitType,BitType>>{
@@ -270,7 +272,7 @@ namespace SHNMBA004{
 					this->lenOfAudioSeconds = (int)(noOfSamples / ((float) sampleRateInHz));
 					audioData.resize(noOfSamples);
 					
-					for(int i = o; i < noOfSamples; i++){
+					for(int i = 0; i < noOfSamples; i++){
 						char buffer[sizeof(BitType)];
 						BitType sample;
 						input.read((char *) buffer, sizeof(BitType)); //reads in the sample
@@ -304,7 +306,7 @@ namespace SHNMBA004{
 				noOfSamples = 0;
 				lenOfAudioSeconds = 0;
 				audioData.clear();
-				std::vector<std::pair<BitType,BitType>>().swap(audioData)
+				std::vector<std::pair<BitType,BitType>>().swap(audioData);
 			}
 			
 			//constructor
@@ -357,7 +359,7 @@ namespace SHNMBA004{
 		};
 		
 		int getNoOfSamples(){
-			return noOfSamples
+			return noOfSamples;
 		};
 		
 		int getLenInSec(){
@@ -411,7 +413,7 @@ namespace SHNMBA004{
 		//adds the sound amplitudes
 		audio operator + (const audio & rhs){
 			audio con(*this);
-			for(int i = 0; i < audioData,size(); ++i){
+			for(int i = 0; i < audioData.size(); ++i){
 				BitType sumLeft = audioData[i].first + rhs.audioData[i].first;
 				if (sumLeft > std::numeric_limits<BitType>::max()){
 					sumLeft = std::numeric_limits<BitType>::max();//clamp if too large
@@ -431,7 +433,7 @@ namespace SHNMBA004{
 			int noOfSamplesWithCuts = noOfSamples - (rangeCut.second - rangeCut.first) - 1;
 			int cutLength = (int) (noOfSamplesWithCuts / ((float) sampleRateInHz));
 			std::vector<std::pair<BitType,BitType>> cutAudioData;
-			for(int i = 0; i < audioData.size(), ++i){
+			for(int i = 0; i < audioData.size(); ++i){
 				if(i < rangeCut.first || i < rangeCut.second){
 					cutAudioData.push_back(audioData[i]);
 				}
@@ -488,20 +490,22 @@ namespace SHNMBA004{
 				std::pair<float,float> d;
 				std::pair<float,float> c;
 			public:
-				Normalize(std::pair<float.float> d, std::pair<float,float> c): d(d), c(c){}
+				Normalize(std::pair<float,float> d, std::pair<float,float> c): d(d), c(c){}
 					std::pair<BitType,BitType> operator()(std::pair<BitType,BitType> inAmp){
 						BitType outAmpLeft = (BitType) (inAmp.first * (d.first/c.first));
 						BitType outAmpRight = (BitType) (inAmp.second * (d.second/c.second));
-						if(outAmpL > std::numeric_limits<BitType>::max()){
-							outAmpL = std::numeric_limits<BitType>::max();
+						if(outAmpLeft > std::numeric_limits<BitType>::max()){
+							outAmpLeft = std::numeric_limits<BitType>::max();
 							}
-						if(outAmpR > std::numeric_limits<BitType>::max()){
-							outAmpR = std::numeric_limits<BitType>::max();
+						if(outAmpRight > std::numeric_limits<BitType>::max()){
+							outAmpRight = std::numeric_limits<BitType>::max();
 							}
-						return {outAmpL, outAmpR};
+						return {outAmpLeft, outAmpRight};
 					}
 		};
-	}
 };
+}
 
 #endif //AUDIO_H
+
+
