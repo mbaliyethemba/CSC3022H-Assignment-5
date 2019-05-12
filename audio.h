@@ -10,6 +10,7 @@
 #include <algorithm>
 #include <numeric>
 #include <math.h>
+#include "catch.hpp"
 
 namespace SHNMBA004{
 	//Generic parameters
@@ -41,13 +42,14 @@ namespace SHNMBA004{
 							input.read((char *) buffer2, sizeof(BitType)); //reads in sample from right ear
 						}
 						else{
-							audioData[i] = (*(BitType*) buffer);
+							audioData[i] = *(BitType*) buffer;
 						}
 					}
 					input.close();
 				}
 				else{
 					std::cout<<"Cannot open file"<<std::endl;
+					exit(0);
 				}
 			}
 		public:
@@ -134,7 +136,7 @@ namespace SHNMBA004{
 			std::string full = outfile + "_" + std::to_string(sampleRateInHz) + "_" + std::to_string(sizeof(BitType)*8) + "_mono.raw";
 			std::ofstream output(full, std::ios::binary | std::ios::out);
 			if(output.is_open()){
-				for(int i = 0; i < audioData.size(); ++i){
+				for(unsigned int i = 0; i < audioData.size(); ++i){
 					output.write(reinterpret_cast<const char *>(&audioData[i]), sizeof(BitType));
 				}
 			}
@@ -153,7 +155,7 @@ namespace SHNMBA004{
 		//concatenate two audio data together
 		audio operator | (const audio & rhs){
 			audio con(*this);
-			con.audioDate.insert(con.audioData.end(), rhs.audioData.begin(), rhs.audioData.end());
+			con.audioData.insert(con.audioData.end(), rhs.audioData.begin(), rhs.audioData.end());
 			con.lenOfAudioSeconds = con.lenOfAudioSeconds + rhs.lenOfAudioSeconds;
 			con.noOfSamples = con.noOfSamples + rhs.noOfSamples;
 			return con;
@@ -171,7 +173,7 @@ namespace SHNMBA004{
 		//adds the sound amplitudes
 		audio operator + (const audio & rhs){
 			audio con(*this);
-			for(int i = 0; i < audioData.size(); ++i){
+			for(unsigned int i = 0; i < audioData.size(); ++i){
 				BitType sumOfSound = audioData[i] + rhs.audioData[i];
 				if (sumOfSound > std::numeric_limits<BitType>::max()){
 					sumOfSound = std::numeric_limits<BitType>::max();//clamp if too large
@@ -186,7 +188,7 @@ namespace SHNMBA004{
 			int noOfSamplesWithCuts = noOfSamples - (rangeCut.second - rangeCut.first) - 1;
 			int cutLength = (int) (noOfSamplesWithCuts / ((float) sampleRateInHz));
 			std::vector<BitType> cutAudioData;
-			for(int i = 0; i < audioData.size(); ++i){
+			for(unsigned int i = 0; i < audioData.size(); ++i){
 				if(i < rangeCut.first || i < rangeCut.second){
 					cutAudioData.push_back(audioData[i]);
 				}
@@ -205,7 +207,7 @@ namespace SHNMBA004{
 			audio range2(rhs);
 			range2.audioData.clear();
 			range2.audioData.resize(rangeCut.second - rangeCut.first);
-			std::copy(rhs.audioData.begin() + rangeCut.first, audioData.begin() + rangeCut.second, range2.audioData.begin());
+			std::copy(rhs.audioData.begin() + rangeCut.first, rhs.audioData.begin() + rangeCut.second, range2.audioData.begin());
 			audio rangeAdded = range1 + range2;
 			std::copy(rangeAdded.audioData.begin(), rangeAdded.audioData.end(), rangefinal.audioData.begin() + rangeCut.first);
 			return rangefinal;
@@ -264,33 +266,33 @@ namespace SHNMBA004{
 			int lenOfAudioSeconds;
 			
 			//loads audio file using binary reading
-			void loadAudio(const std::string &filename){
-				std::ifstream input(filename,std::ios::binary|std::ios::in);
-				if(input.is_open()){
-					long fileSize = filesize(filename);
-					this->noOfSamples = fileSize/(sizeof(BitType) * noOfChannels);
-					this->lenOfAudioSeconds = (int)(noOfSamples / ((float) sampleRateInHz));
-					audioData.resize(noOfSamples);
-					
-					for(int i = 0; i < noOfSamples; i++){
-						char buffer[sizeof(BitType)];
-						BitType sample;
-						input.read((char *) buffer, sizeof(BitType)); //reads in the sample
-						if(noOfChannels == 2){
-							char buffer2[sizeof(BitType)];
-							BitType sample2;
-							input.read((char *) buffer2, sizeof(BitType)); //reads in sample from right ear
-						}
-						else{
-							audioData[i] = (*(BitType*) buffer);
-						}
-					}
-					input.close();
-				}
-				else{
-					std::cout<<"Cannot open file"<<std::endl;
-				}
-			}
+			void loadAudio(const std::string &fileName){
+            std::ifstream input(fileName,std::ios::binary| std::ios::in); //get file in binary
+
+            if (input.is_open()){
+                long fileSize =  filesize(fileName);
+                this->noOfSamples = fileSize/( sizeof(BitType) * noOfChannels);
+                this->lenOfAudioSeconds = (int) (noOfSamples / ((float) sampleRateInHz));
+
+                audioData.resize(noOfSamples); //Reserve space for samples
+
+                for (int i = 0; i < noOfSamples; ++i) {
+                    char buffer[sizeof(BitType)];
+                    BitType sample;
+                    input.read((char *) buffer, sizeof(BitType)); //read in sample
+                    char buffer2[sizeof(BitType)];
+                    BitType sampleR;
+                    input.read((char *) &sampleR, sizeof(BitType));
+                    audioData[i] = (std::make_pair(sample, sampleR));
+                }
+                input.close();
+            }
+            else{
+                std::cout<<"Can't open file"<<std::endl;
+                exit(0);
+            }
+
+        }
 		public:
 			//constructor
 			audio(const std::string &filename, int &channel, int &rate) : noOfChannels(channel), sampleRateInHz(rate){
@@ -375,7 +377,7 @@ namespace SHNMBA004{
 			std::string full = outfile + "_" + std::to_string(sampleRateInHz) + "_" + std::to_string(sizeof(BitType)*8) + "_stereo.raw";
 			std::ofstream output(full, std::ios::binary | std::ios::out);
 			if(output.is_open()){
-				for(int i = 0; i < audioData.size(); ++i){
+				for(unsigned int i = 0; i < audioData.size(); ++i){
 					output.write(reinterpret_cast<const char *>(&audioData[i].first), sizeof(BitType));
 					output.write(reinterpret_cast<const char *>(&audioData[i].second), sizeof(BitType));
 				}
@@ -395,7 +397,7 @@ namespace SHNMBA004{
 		//concatenate two audio data together
 		audio operator | (const audio & rhs){
 			audio con(*this);
-			con.audioDate.insert(con.audioData.end(), rhs.audioData.begin(), rhs.audioData.end());
+			con.audioData.insert(con.audioData.end(), rhs.audioData.begin(), rhs.audioData.end());
 			con.lenOfAudioSeconds = con.lenOfAudioSeconds + rhs.lenOfAudioSeconds;
 			con.noOfSamples = con.noOfSamples + rhs.noOfSamples;
 			return con;
@@ -413,7 +415,7 @@ namespace SHNMBA004{
 		//adds the sound amplitudes
 		audio operator + (const audio & rhs){
 			audio con(*this);
-			for(int i = 0; i < audioData.size(); ++i){
+			for(unsigned int i = 0; i < audioData.size(); ++i){
 				BitType sumLeft = audioData[i].first + rhs.audioData[i].first;
 				if (sumLeft > std::numeric_limits<BitType>::max()){
 					sumLeft = std::numeric_limits<BitType>::max();//clamp if too large
@@ -433,7 +435,7 @@ namespace SHNMBA004{
 			int noOfSamplesWithCuts = noOfSamples - (rangeCut.second - rangeCut.first) - 1;
 			int cutLength = (int) (noOfSamplesWithCuts / ((float) sampleRateInHz));
 			std::vector<std::pair<BitType,BitType>> cutAudioData;
-			for(int i = 0; i < audioData.size(); ++i){
+			for(unsigned int i = 0; i < audioData.size(); ++i){
 				if(i < rangeCut.first || i < rangeCut.second){
 					cutAudioData.push_back(audioData[i]);
 				}
@@ -452,7 +454,7 @@ namespace SHNMBA004{
 			audio range2(rhs);
 			range2.audioData.clear();
 			range2.audioData.resize(rangeCut.second - rangeCut.first);
-			std::copy(rhs.audioData.begin() + rangeCut.first, audioData.begin() + rangeCut.second, range2.audioData.begin());
+			std::copy(rhs.audioData.begin() + rangeCut.first, rhs.audioData.begin() + rangeCut.second, range2.audioData.begin());
 			audio rangeAdded = range1 + range2;
 			std::copy(rangeAdded.audioData.begin(), rangeAdded.audioData.end(), rangefinal.audioData.begin() + rangeCut.first);
 			return rangefinal;
