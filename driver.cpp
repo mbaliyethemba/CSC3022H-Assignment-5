@@ -88,7 +88,76 @@ int main(int argc, char * argv[]){
                 cutAudio.saveAudio(outfile);
             }
 		}
-			
-		}
+		
+		else if (op == "-radd"){
+            int r1  = getIntFromArgs(argv[index]);
+            index++;
+            int r2 = getIntFromArgs(argv[index]);
+            pair<int,int> cutRange = make_pair(r1,r2);
+            index++;
+            string infile = argv[index];
+            index++;
+            string infile1 = argv[index];
+            if (bits && (channel==1)){ 
+				//8bit and Mono
+                audio<int8_t> audIn = audio<int8_t>(infile,channel,sampleRate);
+                audio<int8_t> audIn1 = audio<int8_t>(infile1,channel,sampleRate);
+                audio<int8_t> addAudio = audIn.rangeAdd(audIn1,cutRange);
+                addAudio.saveAudio(outfile);
+            }else if (!bits && (channel == 1)){ 
+				//16bit and Mono
+                audio<int16_t> audIn = audio<int16_t>(infile,channel,sampleRate);
+                audio<int16_t> audIn1 = audio<int16_t>(infile1,channel,sampleRate);
+                audio<int16_t> addAudio = audIn.rangeAdd(audIn1,cutRange);
+                addAudio.saveAudio(outfile);
+            }
+            else if(bits && (channel==2)){ 
+				//8bit and Stereo
+                audio<pair<int8_t,int8_t>> audIn = audio<pair<int8_t,int8_t>>(infile,channel,sampleRate);
+                audio<pair<int8_t,int8_t>> audIn1 = audio<pair<int8_t,int8_t>>(infile1,channel,sampleRate);
+                audio<pair<int8_t,int8_t>> addAudio = audIn.rangeAdd(audIn1,cutRange);
+                addAudio.saveAudio(outfile);
+            }
+            else if(!bits && (channel==2)){ 
+				//16bit and Stereo
+                audio<pair<int16_t,int16_t>> audIn = audio<pair<int16_t,int16_t>>(infile,channel,sampleRate);
+                audio<pair<int16_t,int16_t>> audIn1 = audio<pair<int16_t,int16_t>>(infile1,channel,sampleRate);
+                audio<pair<int16_t,int16_t>> addAudio = audIn.rangeAdd(audIn1,cutRange);
+                addAudio.saveAudio(outfile);
+            }
 	}
+	else if (op == "-cat"){
+            index++;
+            string infile = argv[index];
+            index++;
+            string infile1 = argv[index];
+            if (bits && (channel==1)){ 
+				//8bit and Mono
+                audio<int8_t> audIn = audio<int8_t>(infile,channel,sampleRate);
+                audio<int8_t> audIn1 = audio<int8_t>(infile1,channel,sampleRate);
+                audio<int8_t> addAudio = audIn | audIn1;
+                addAudio.saveAudio(outfile);
+            }else if (!bits && (channel == 1)){ 
+				//16bit and Mono
+                audio<int16_t> audIn = audio<int16_t>(infile,channel,sampleRate);
+                audio<int16_t> audIn1 = audio<int16_t>(infile1,channel,sampleRate);
+                audio<int16_t> addAudio = audIn | audIn1;
+                addAudio.saveAudio(outfile);
+            }
+            else if(bits && (channel==2)){ 
+				//8bit and Stereo
+                audio<pair<int8_t,int8_t>> audIn = audio<pair<int8_t,int8_t>>(infile,channel,sampleRate);
+                audio<pair<int8_t,int8_t>> audIn1 = audio<pair<int8_t,int8_t>>(infile1,channel,sampleRate);
+                audio<pair<int8_t,int8_t>> addAudio = audIn | audIn1;
+                addAudio.saveAudio(outfile);
+            }
+            else if(!bits && (channel==2)){ 
+				//16bit and Stereo
+                audio<pair<int16_t,int16_t>> audIn = audio<pair<int16_t,int16_t>>(infile,channel,sampleRate);
+                audio<pair<int16_t,int16_t>> audIn1 = audio<pair<int16_t,int16_t>>(infile1,channel,sampleRate);
+                audio<pair<int16_t,int16_t>> addAudio = audIn | audIn1;
+                addAudio.saveAudio(outfile);
+            }
+		}	
+}
 }
