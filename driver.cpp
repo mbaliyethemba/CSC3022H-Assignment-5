@@ -197,10 +197,38 @@ int main(int argc, char * argv[]){
             }
             else if(!bits && (channel==2)){
 				 //16bit and Stereo
-                audio<pair<int16_t,int16_t>> audioLoadedIn = audio<pair<int16_t,int16_t>>(infile,channel,sampleRate);
-                audio<pair<int16_t,int16_t>> cutAudio = audioIn * volumeFactorPair;
+                audio<pair<int16_t,int16_t>> audIn = audio<pair<int16_t,int16_t>>(infile,channel,sampleRate);
+                audio<pair<int16_t,int16_t>> cutAudio = audIn * volumeFactorPair;
                 cutAudio.saveAudio(outfile);
             }
-		}	
+		}
+		
+		else if (op == "-rms"){
+            index++;
+            string infile = argv[index];
+            if (bits && (channel==1)){ 
+				//8bit and Mono
+                audio<int8_t> audIn = audio<int8_t>(infile,channel,sampleRate);
+                float rms = audIn.RMS();
+                cout<<"RMS is: "<< rms<<endl;
+            }
+            else if (!bits && (channel == 1)){ 
+				//16bit and Mono
+                audio<int16_t> audIn = audio<int16_t>(infile,channel,sampleRate);
+                cout<<"RMS is: "<<audIn.RMS()<<endl;
+            }
+            else if(bits && (channel==2)){ 
+				//8bit and Stereo
+                audio<pair<int8_t,int8_t>> audIn = audio<pair<int8_t,int8_t>>(infile,channel,sampleRate);
+                cout<<"RMS for Left side is: "<<audIn.RMS().first<<endl;
+                cout<<"RMS for Right side is: "<<audIn.RMS().second<<endl;
+            }
+            else if(!bits && (channel==2)){ 
+				//16bit and Stereo
+                audio<pair<int16_t,int16_t>> audIn = audio<pair<int16_t,int16_t>>(infile,channel,sampleRate);
+                cout<<"RMS for Left side is: "<<audIn.RMS().first<<endl;
+                cout<<"RMS for Right side is: "<<audIn.RMS().second<<endl;
+            }	
+		}
 }
 }
