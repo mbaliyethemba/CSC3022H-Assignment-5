@@ -69,7 +69,8 @@ int main(int argc, char * argv[]){
                 audio<int8_t> audIn = audio<int8_t>(infile,channel,sampleRate);
                 audio<int8_t> cutAudio = audIn^cutRange;
                 cutAudio.saveAudio(outfile);
-            }else if (!bits && (channel == 1)){ 
+            }
+            else if (!bits && (channel == 1)){ 
 				//16bit and Mono
                 audio<int16_t> audIn = audio<int16_t>(infile,channel,sampleRate);
                 audio<int16_t> cutAudio = audIn^cutRange;
@@ -104,7 +105,8 @@ int main(int argc, char * argv[]){
                 audio<int8_t> audIn1 = audio<int8_t>(infile1,channel,sampleRate);
                 audio<int8_t> addAudio = audIn.rangeAdd(audIn1,cutRange);
                 addAudio.saveAudio(outfile);
-            }else if (!bits && (channel == 1)){ 
+            }
+            else if (!bits && (channel == 1)){ 
 				//16bit and Mono
                 audio<int16_t> audIn = audio<int16_t>(infile,channel,sampleRate);
                 audio<int16_t> audIn1 = audio<int16_t>(infile1,channel,sampleRate);
@@ -137,7 +139,8 @@ int main(int argc, char * argv[]){
                 audio<int8_t> audIn1 = audio<int8_t>(infile1,channel,sampleRate);
                 audio<int8_t> addAudio = audIn | audIn1;
                 addAudio.saveAudio(outfile);
-            }else if (!bits && (channel == 1)){ 
+            }
+            else if (!bits && (channel == 1)){ 
 				//16bit and Mono
                 audio<int16_t> audIn = audio<int16_t>(infile,channel,sampleRate);
                 audio<int16_t> audIn1 = audio<int16_t>(infile1,channel,sampleRate);
@@ -157,6 +160,46 @@ int main(int argc, char * argv[]){
                 audio<pair<int16_t,int16_t>> audIn1 = audio<pair<int16_t,int16_t>>(infile1,channel,sampleRate);
                 audio<pair<int16_t,int16_t>> addAudio = audIn | audIn1;
                 addAudio.saveAudio(outfile);
+            }
+		}
+		
+		 else if (op == "-v"){
+            index++; //to get to first volumefactor
+            float v1  = getFloatFromArgs(argv[index]);
+
+            pair<int,int> volumeFactorPair;
+            if (channel ==2){
+                index++;
+                float v2 = getFloatFromArgs(argv[index]);
+                volumeFactorPair = make_pair(v1,v2);
+            }
+
+            index++;
+            string infile = argv[index];
+
+            if (bits && (channel==1)){ 
+				//8bit and Mono
+                audio<int8_t> audIn = audio<int8_t>(infile,channel,sampleRate);
+                audio<int8_t> cutAudio = audIn * v1;
+                cutAudio.saveAudio(outfile);
+            }
+            else if (!bits && (channel == 1)){ 
+				//16bit and Mono
+                audio<int16_t> audIn = audio<int16_t>(infile,channel,sampleRate);
+                audio<int16_t> cutAudio = audIn * v1;
+                cutAudio.saveAudio(outfile);
+            }
+            else if(bits && (channel==2)){ 
+				//8bit and Stereo
+                audio<pair<int8_t,int8_t>> audIn = audio<pair<int8_t,int8_t>>(infile,channel,sampleRate);
+                audio<pair<int8_t,int8_t>> cutAudio = audIn * volumeFactorPair;
+                cutAudio.saveAudio(outfile);
+            }
+            else if(!bits && (channel==2)){
+				 //16bit and Stereo
+                audio<pair<int16_t,int16_t>> audioLoadedIn = audio<pair<int16_t,int16_t>>(infile,channel,sampleRate);
+                audio<pair<int16_t,int16_t>> cutAudio = audioIn * volumeFactorPair;
+                cutAudio.saveAudio(outfile);
             }
 		}	
 }
