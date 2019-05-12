@@ -259,5 +259,45 @@ int main(int argc, char * argv[]){
                 audIn.saveAudio(outfile);
             }
 		}
+		
+		else if (op == "-norm"){
+            index++;
+            float r1  = getFloatFromArgs(argv[index]);
+
+            pair<int,int> normPair ;
+            if (channel ==2){
+                index++;
+                float r2 = getFloatFromArgs(argv[index]);
+                normPair = make_pair(r1,r2);
+            }
+
+            index++;
+            string infile = argv[index];
+
+            if (bits && (channel==1)){ 
+				//8bit and Mono
+                audio<int8_t> audIn = audio<int8_t>(infile,channel,sampleRate);
+                audio<int8_t> cutAudio = audIn.normalize(r1);
+                cutAudio.saveAudio(outfile);
+            }
+            else if (!bits && (channel == 1)){ 
+				//16bit and Mono
+                audio<int16_t> audIn = audio<int16_t>(infile,channel,sampleRate);
+                audio<int16_t> cutAudio = audIn.normalize(r1);
+                cutAudio.saveAudio(outfile);
+            }
+            else if(bits && (channel==2)){ 
+				//8bit and Stereo
+                audio<pair<int8_t,int8_t>> audIn = audio<pair<int8_t,int8_t>>(infile,channel,sampleRate);
+                audio<pair<int8_t,int8_t>> cutAudio = audIn.normalize(normPair);
+                cutAudio.saveAudio(outfile);
+            }
+            else if(!bits && (channel==2)){ 
+				//16bit and Stereo
+                audio<pair<int16_t,int16_t>> audIn = audio<pair<int16_t,int16_t>>(infile,channel,sampleRate);
+                audio<pair<int16_t,int16_t>> cutAudio = audIn.normalize(normPair);
+                cutAudio.saveAudio(outfile);
+            }
+		}
 }
 }
