@@ -58,3 +58,27 @@ TEST_CASE("Test : Special Members"){
 		REQUIRE(audLoad.checkIfAudioEmpty());
 	}
 }
+
+TEST_CASE("Saving and Loading Audio"){
+	SECTION("Mono Test"){
+		string filename = "sample_input/beez18sec_44100_signed_8bit_mono.raw";
+		int channel = 1;
+		int srate = 44100;
+		audio<int8_t> audLoad = audio<int8_t>(filename,channel,srate);
+		audLoad.saveAudio("beezM");
+		string filesaved = "beezM_44100_8_mono.raw";
+		audio<int8_t> audSaved = audio<int8_t>(filesaved,channel,srate);
+		REQUIRE(audLoad == audSaved);
+	}
+	
+	SECTION("Stereo Test"){
+		string filename = "sample_input/beez18sec_44100_signed_8bit_stereo.raw";
+		int channel = 2;
+		int srate = 44100;
+		audio<pair<int8_t,int8_t>> audLoad = audio<pair<int8_t,int8_t>>(filename,channel,srate);
+		audLoad.saveAudio("beezS");
+		string filesaved = "beezS_44100_8_stereo.raw";
+		audio<pair<int8_t,int8_t>> audSaved = audio<pair<int8_t,int8_t>>(filesaved,channel,srate);
+		REQUIRE(audLoad == audSaved);
+	}
+}
