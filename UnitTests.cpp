@@ -10,11 +10,35 @@ TEST_CASE("Test"){
 		string filename = "sample_input/beez18sec_44100_signed_8bit_mono.raw";
 		int channel = 1;
 		int srate = 44100;
-		audio<int8_t> audLoad = audio<int8_t>(filename,channel,rate);
+		audio<int8_t> audLoad = audio<int8_t>(filename,channel,srate);
 		REQUIRE((audLoad.getNoOfChannels() == channel));
 		REQUIRE((audLoad.getLenInSec() == 18));
 		REQUIRE((audLoad.getNoOfSamples() == 793800));
 		REQUIRE((audLoad.getSampleRate() == srate));
 	}
 	
+	SECTION("Destructor"){
+		string filename = "sample_input/countdown40sec_44100_signed_8bit_mono.raw";
+		int channel = 1;
+		int srate = 44100;
+		audio<int8_t> *audLoad = new audio<int8_t>(filename,channel,srate);
+		delete audLoad;
+		 //Check if data cleared
+		REQUIRE(audLoad->checkIfAudioEmpty());
+	}
+	
+	SECTION("Copy/Move Constructor"){
+		string filename = "sample_input/frogs18sec_44100_signed_8bit_mono.raw";
+		int channel = 1;
+		int srate = 44100;
+		audio<int8_t> audLoad = audio<int8_t>(filename,channel,srate);
+		audio<int8_t> copyAud(audLoad);
+		REQUIRE((audLoad == copyAud));
+		audio<int8_t> movedAud(move(audLoad));
+		REQUIRE((audLoad.getNoOfChannels() == 0));
+		REQUIRE((audLoad.getLenInSec() == 0));
+		REQUIRE((audLoad.getNoOfSamples() == 0));
+		REQUIRE((audLoad.getSampleRate() == 0));
+		REQUIRE(audLoad.checkIfAudioEmpty());
+	}
 }
