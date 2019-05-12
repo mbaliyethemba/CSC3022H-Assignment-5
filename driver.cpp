@@ -3,7 +3,7 @@
 
 int getIntFromArgs(char * arg);
 
-float getFloatFromAgrs(char * arg);
+float getFloatFromArgs(char * arg);
 
 using namespace std;
 using namespace SHNMBA004;
@@ -300,4 +300,18 @@ int main(int argc, char * argv[]){
             }
 		}
 }
+return 0;
 }
+int getIntFromArgs(char * arg){
+    stringstream argString(arg);
+    int threshold;
+    argString >>threshold;
+    return threshold;
+}
+float getFloatFromArgs(char * arg){
+    stringstream argString(arg);
+    float threshold;
+    argString >>threshold;
+    return threshold;
+}
+
